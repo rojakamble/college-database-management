@@ -1,0 +1,261 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace cdb
+{
+    class Program
+    {
+
+        SqlConnection con = new SqlConnection("Data Source=(localdb)\\ProjectsV13;Integrated Security=SSPI;Initial Catalog=collgdb;");
+
+        SqlCommand cmd;
+
+        public SqlConnection Con { get => Con1; set => Con1 = value; }
+        public SqlConnection Con1 { get => con; set => con = value; }
+
+        static void Main(string[] args)
+        {
+            Program p = new Program();
+
+            Console.WriteLine("----------------------------------------");
+            Console.WriteLine("            WELCOME TO TRUYUM           ");
+            Console.WriteLine("----------------------------------------");
+
+            Console.WriteLine("Select: \n" +
+                "1) Customer \n" +
+                "2) Admin");
+            int k = Convert.ToInt32(Console.ReadLine());
+
+            if (k == 1)
+            {
+                Console.WriteLine("----------------------------------------");
+                Console.WriteLine("Select: \n" +
+                    "1) View Menu Items \n" +
+                    "2) View Cart Items");
+                int i = Convert.ToInt32(Console.ReadLine());
+
+                if (i == 1) { p.menuitm(); }
+                else { p.cartitm(); }
+            }
+            else if (k == 2)
+            {
+                Console.WriteLine("----------------------------------------");
+                Console.WriteLine("Select: \n" +
+                    "1) View Menu Items \n" +
+                    "2) Edit Menu Items");
+
+                int i = Convert.ToInt32(Console.ReadLine());
+
+                if (i == 1) { p.admmenuitm(); }
+                else { p.edititm(); }
+            }
+            else
+            {
+                Console.WriteLine("INVALID INPUT");
+            }
+
+        }
+
+        public void menuitm()
+        {
+            int i;
+            Console.WriteLine("-----------------------------------------------------------------------------------");
+            Con.Open();
+            cmd = new SqlCommand("select * from menuitems", Con);
+
+            SqlDataReader dr = cmd.ExecuteReader();
+            while (dr.Read())
+            {
+                Console.Write(dr[0].ToString() + "\t");
+                Console.Write(dr[1].ToString() + "\t");
+                Console.Write(dr[2].ToString() + "\t");
+                Console.Write(dr[3].ToString() + "\t");
+                Console.Write(dr[4].ToString());
+                Console.WriteLine();
+            }
+            dr.Close();
+            Con.Close();
+
+            do
+            {
+                Console.WriteLine(" enter \n 1) add item to cart \n 2) to view cart");
+
+                i = Convert.ToInt32(Console.ReadLine());
+
+                Console.WriteLine("enter the cart item number");
+                int j = Convert.ToInt32(Console.ReadLine());
+                Console.WriteLine("enter the menu item number");
+                int k = Convert.ToInt32(Console.ReadLine());
+                Console.WriteLine("enter the item name");
+                string l = Console.ReadLine();
+                Console.WriteLine("enter the item price");
+                int m = Convert.ToInt32(Console.ReadLine());
+
+
+                Con.Open();
+                cmd = new SqlCommand("insert into cartitms values(@j,@k,@l,@m)", Con);
+                cmd.Parameters.AddWithValue("@j", j);
+                cmd.Parameters.AddWithValue("@k", k);
+                cmd.Parameters.AddWithValue("@l", l);
+                cmd.Parameters.AddWithValue("@m", m);
+
+                cmd.ExecuteNonQuery();
+                Con.Close();
+                Console.WriteLine("item added to cart \n ------------------------------------------------------------------------------------");
+            } while (i == 1);
+            cartitm();
+        }
+
+        public void admmenuitm()
+        {
+            Console.WriteLine("-----------------------------------------------------------------------------------");
+            Con.Open();
+            cmd = new SqlCommand("select * from menuitems", Con);
+
+            SqlDataReader dr = cmd.ExecuteReader();
+            while (dr.Read())
+            {
+                Console.Write(dr[0].ToString() + "\t");
+                Console.Write(dr[1].ToString() + "\t");
+                Console.Write(dr[2].ToString() + "\t");
+                Console.Write(dr[3].ToString() + "\t");
+                Console.Write(dr[4].ToString());
+                Console.WriteLine();
+            }
+            dr.Close();
+            Con.Close();
+        }
+        public void cartitm()
+        {
+            Con.Open();
+            cmd = new SqlCommand("select * from cartitms", Con);
+
+            SqlDataReader dr = cmd.ExecuteReader();
+
+            while (dr.Read())
+            {
+                Console.Write(dr[0].ToString() + "\t");
+                Console.Write(dr[1].ToString() + "\t");
+                Console.Write(dr[2].ToString() + "\t");
+                Console.Write(dr[3].ToString());
+                Console.WriteLine();
+            }
+            dr.Close();
+
+            cmd = new SqlCommand("select sum(price) from cartitms", Con);
+            Console.Write("Total price  ");
+
+            int da = Convert.ToInt32(cmd.ExecuteScalar());
+            Console.WriteLine(da.ToString());
+            dr.Close();
+            Con.Close();
+
+
+            Console.WriteLine("------------------------------------------------------------------------\n" +
+                "enter the item number to remove else press 0");
+            int o = Convert.ToInt32(Console.ReadLine());
+            if (o != 0)
+            {
+                Con.Open();
+                cmd = new SqlCommand("delete from cartitms where id=" + o, Con);
+
+                cmd.ExecuteNonQuery();
+                Con.Close();
+
+            }
+
+        }
+
+        public void edititm()
+        {
+            Console.WriteLine("--------------------------------------------");
+            Console.WriteLine("Enter the action:\n 1) insert item 2) delete item 3)update item");
+            int i = Convert.ToInt32(Console.ReadLine());
+            switch (i)
+            {
+
+                case 1:
+                    {
+
+                        Console.WriteLine("enter the menu item number");
+                        int j = Convert.ToInt32(Console.ReadLine());
+                        Console.WriteLine("enter the item name");
+                        string k = Console.ReadLine();
+                        Console.WriteLine("enter the item price");
+                        int l = Convert.ToInt32(Console.ReadLine());
+                        Console.WriteLine("enter the  item date");
+                        DateTime m = Convert.ToDateTime(Console.ReadLine());
+                        Console.WriteLine("enter the item catergory");
+                        string n = Console.ReadLine();
+
+
+                        Con.Open();
+                        cmd = new SqlCommand("insert into menuitems values(@j,@k,@l,@m,@n)", Con);
+                        cmd.Parameters.AddWithValue("@j", j);
+                        cmd.Parameters.AddWithValue("@k", k);
+                        cmd.Parameters.AddWithValue("@l", l);
+                        cmd.Parameters.AddWithValue("@m", m);
+                        cmd.Parameters.AddWithValue("@n", n);
+
+                        cmd.ExecuteNonQuery();
+                        Con.Close();
+
+                        break;
+                    }
+                case 2:
+                    {
+                        Console.WriteLine("enter the menu item number to be deleted");
+                        int j = Convert.ToInt32(Console.ReadLine());
+                        Con.Open();
+                        cmd = new SqlCommand("delete from menuitems where menu_id=" + j, Con);
+
+                        cmd.ExecuteNonQuery();
+                        Con.Close();
+
+
+                        break;
+                    }
+                case 3:
+                    {
+                        Console.WriteLine("enter the menu item number to be updated");
+                        int j = Convert.ToInt32(Console.ReadLine());
+                        Console.WriteLine("enter the item name");
+                        string k = Console.ReadLine();
+                        Console.WriteLine("enter the item price");
+                        int l = Convert.ToInt32(Console.ReadLine());
+                        Console.WriteLine("enter the  item date");
+                        DateTime m = Convert.ToDateTime(Console.ReadLine());
+                        Console.WriteLine("enter the item catergory");
+                        string n = Console.ReadLine();
+
+
+                        Con.Open();
+                        cmd = new SqlCommand("update menuitems where name=@k,price=@l,date_of_launch=@m,catergory=@n where menu_id=@j", Con);
+                        cmd.Parameters.AddWithValue("@j", j);
+                        cmd.Parameters.AddWithValue("@k", k);
+                        cmd.Parameters.AddWithValue("@l", l);
+                        cmd.Parameters.AddWithValue("@m", m);
+                        cmd.Parameters.AddWithValue("@n", n);
+
+                        cmd.ExecuteNonQuery();
+                        Con.Close();
+
+                        break;
+                    }
+                default:
+                    {
+                        Console.WriteLine("INVALID INPUT");
+                        break;
+                    }
+
+
+
+            }
+        }
+
+    }
+}
